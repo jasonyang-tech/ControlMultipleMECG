@@ -308,6 +308,7 @@ case_index = 0
 
 def main():
     global case_index
+    # if shared_lock is passed, devices advance to next free case between devices that also have the lock
     shared_lock = threading.Lock()
     # MECG Connection
     device1 = Device("Advance", "mecgFiles\\MECG20x64.dll", cam1_path,
@@ -315,14 +316,14 @@ def main():
                     pause_duration=5, # Pause between cases to settle (minutes)
                     suffix="", # Suffix added to end of zip folder names for labelling
                     zipResults=False, # zip up case results at end of case
-                    shared_lock=None, # if shared_lock is passed, devices advance to next free case between devices that also have the lock
+                    shared_lock=None, # If shared_lock is None, device will run through all cases
                     )
     device2 = Device("Root1", "mecgFiles\\MECG20x64.2.dll", cam2_path,
                     interval_sec=0,  # Set interval_sec=0 to save as video instead of individual frames
                     pause_duration=5,
                     suffix="",
                     zipResults=False,
-                    shared_lock=None, # If shared_lock is None, device will run through all cases
+                    shared_lock=None,
                     )
 
     # Start case 0 on both
