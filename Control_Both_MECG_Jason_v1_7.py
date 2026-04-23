@@ -57,9 +57,8 @@ class CamWorker:
                 return
             frame_width  = int(cam.get(cv2.CAP_PROP_FRAME_WIDTH))
             frame_height = int(cam.get(cv2.CAP_PROP_FRAME_HEIGHT))
-            fourcc = cv2.VideoWriter_fourcc(*'XVID')
-            (self.caseDir / self.name).mkdir(parents=True, exist_ok=True)
-            out = cv2.VideoWriter(str(self.caseDir / self.name / "video.avi"), fourcc, fps=30, frameSize=(frame_width, frame_height))
+            fourcc = cv2.VideoWriter_fourcc(*'XVID') # Could try other codecs for better quality/compression
+            out = cv2.VideoWriter(str(self.caseDir / f"{self.name}_{Path(self.caseDir).stem}.avi"), fourcc, fps=30, frameSize=(frame_width, frame_height))
             try:
                 while self.getCaseRunning():
                     if shutdown.is_set():
@@ -192,7 +191,7 @@ class Device:
             self.cleanup()
 
     def OutputDelayHandler(self, delay_time):
-        # self.cam.addDelay(delay_time)
+        #TODO: could use this callback to adjust cam capture timing if needed
         print(f"[{self.name}] output delay:", delay_time)
 
     def set_header(self, WHALETEQ_FILE):
@@ -202,11 +201,10 @@ class Device:
         with self._state_lock:
             return self.caseRunning
 
+    # Makes case folder and tells cam to save there; loads whaleteq case file into MECG.
     def set_case_folder(self, case_index):
-        # Try to start next case
         WHALETEQ_FILE = str(files[case_index])
         case_path = Path(WHALETEQ_FILE)
-        # case_path = case_path.parent / case_path.stem
         case_path = OUTPUT_ROOT / case_path.stem
         case_path.mkdir(parents=True, exist_ok=True)
         self.cam.setCaseDir(case_path)
