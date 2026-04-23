@@ -213,6 +213,7 @@ class Device:
         return case_path
     
 
+    # cleans up and if zipResults is True, zip the case folder.
     def cleanup(self):
         print(f"\n{self.name} - Stopping output and cleaning up...")
         for label, fn in [
@@ -246,6 +247,7 @@ class Device:
         while not shutdown.is_set():
             time.sleep(0.1)
             if not self.get_running_state():
+                # Pause between each case to allow index settling
                 if not self.firstCaseFlag:
                     local_time = time.ctime(time.time())
                     print(f"{local_time}: Waiting {self.pauseDuration/60:.1f} min to start next case.")
@@ -253,6 +255,8 @@ class Device:
                     if shutdown.is_set():
                         break
                 self.firstCaseFlag = False
+
+                # Start next case
                 local_time = time.ctime(time.time())
                 print(f"{local_time}, [{self.name}] attempting case {self.case_index}")
                 self.start_next_case()

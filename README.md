@@ -1,6 +1,6 @@
 # ControlMultipleMECG
 
-Control_Both_MECG_Jason_v1_7.py
+Control_Both_MECG.py
 Script used to select the case-specific WhaleTeq replay file, connect to the designated MECG device, start playback, stop playback, and write run logs. Whaleteq SDK can be downloaded from: https://pascallqms.atlassian.net/browse/IEE-352 
 ![alt text](AdvanceBIS_setup.png)
 
@@ -18,7 +18,8 @@ Data logging
     Upload raw media to controlled storage with correct naming convention.
 
 Before each recording session:
-    Run the MECG control script (Control_Both_MECG_Jason_v1_7.py)
+
+    Run the MECG control script (Control_Both_MECG.py)
 
     Verify that the MECG control script can detect the intended MECG device IDs.
         “device is connected (WME2101-240xxx)” will be printed for each connected MECG.
@@ -39,4 +40,4 @@ Before each recording session:
     Press Windows key + X and select Device Manager to check if webcams are connected.
         Device class should be instantiated with a string device name and a path to the MECG20x64.dll and MECG20x64.2.dll files on your computer. To connect more MECGs, simply duplicate this file, rename it to MECG20x64.n.dll, and pass it to a Device class.
 Channel Mapping and Scaling
-When using MECG, if Lead I or Lead II are being used, apply the Wilson Terminal lead-cancellation (e.g., scaling V1-6 as appropriate) so that the intended differential signals appear at the monitor input. If using convert_to_whaleteq_format_v2_v0.py, this is done automatically.
+When using MECG, if Lead I or Lead II are being used, apply the Wilson Terminal lead-cancellation (e.g., scaling V1-6 as appropriate) so that the intended differential signals appear at the monitor input. If using convert_to_whaleteq_format.py, this is done automatically.
