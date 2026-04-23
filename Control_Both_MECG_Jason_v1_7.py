@@ -125,7 +125,7 @@ class CamWorker:
                         (self.caseDir / self.name).mkdir(parents=True, exist_ok=True)
                         tSinceStart = int((time.time() - start) * 1000)
                         fileName = f"{tSinceStart:09d}.png"
-                        cv2.imwrite(str(self.caseDir / self.name / fileName), frame)
+                        cv2.imwrite(str(self.caseDir / self.name / f"{self.name}_{fileName}"), frame)
 
                     next_deadline = time.monotonic() + self.interval
             finally:
