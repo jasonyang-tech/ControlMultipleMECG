@@ -135,11 +135,12 @@ class CamWorker:
 
 # Device Class
 class Device:
-    def __init__(self, name, dll_path, cam_path, pause_duration = 1, interval_sec = 1, suffix=None, zipResults=False):
+    def __init__(self, name, dll_path, cam_path, pause_duration = 1, interval_sec = 1, suffix=None, zipResults=False, shared_lock=None):
         self.name = name                   # "advance" or "vista"
         self.dll_path = dll_path
         self.cam_path = cam_path
         self.suffix = suffix
+        self.shared_lock = shared_lock
         self.thread = threading.Thread(target=self._run, name=f"device-{name}", daemon=True)
         self.connected = threading.Event()
         self.connectedCb = ConnectedCallback(self.DeviceConnectedHandler)
@@ -186,8 +187,14 @@ class Device:
     def OutputSignalHandler(self, total_time, cb_time, voltage_struct, end):
         if end:
             print(f"[{self.name}] case {self.case_index} ended at t={total_time:.3f}s")
-            with self.case_lock:
-                self.case_index += 1
+            if self.shared_lock is not None:
+                with self.shared_lock:
+                    global case_index
+                    case_index += 1
+                    self.case_index = case_index
+            else:
+                with self.case_lock:
+                    self.case_index += 1
             self.cleanup()
 
     def OutputDelayHandler(self, delay_time):
@@ -300,25 +307,28 @@ case_index = 0
 
 
 def main():
-    global device1, device2, case_index
-    
+    global case_index
+    shared_lock = threading.Lock()
     # MECG Connection
     device1 = Device("Advance", "mecgFiles\\MECG20x64.dll", cam1_path,
-                     interval_sec=0,  # Interval_sec is the seconds between each frame (float)
-                     pause_duration=5, # Pause between cases to settle (minutes)
-                     suffix="", # Suffix added to end of zip folder names for labelling
-                     zipResults=False, # zip up case results at end of case
-                     )
+                    interval_sec=0,  # Interval_sec is the seconds between each frame (float)
+                    pause_duration=5, # Pause between cases to settle (minutes)
+                    suffix="", # Suffix added to end of zip folder names for labelling
+                    zipResults=False, # zip up case results at end of case
+                    shared_lock=None, # if shared_lock is passed, devices advance to next free case between devices that also have the lock
+                    )
     device2 = Device("Root1", "mecgFiles\\MECG20x64.2.dll", cam2_path,
-                     interval_sec=0,  # Set interval_sec=0 to save as video instead of individual frames
-                     pause_duration=5,
-                     suffix="",
-                     zipResults=False,
-                     )
+                    interval_sec=0,  # Set interval_sec=0 to save as video instead of individual frames
+                    pause_duration=5,
+                    suffix="",
+                    zipResults=False,
+                    shared_lock=None, # If shared_lock is None, device will run through all cases
+                    )
 
     # Start case 0 on both
     print("\n--- Starting cases on both devices ---")
     device1.start(case_index)
+    # If running sequentially, add 1 to case_index so second device starts on next case
     device2.start(case_index)
 
     # Run until all cases are done
