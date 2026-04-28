@@ -1,48 +1,130 @@
 # ControlMultipleMECG
 
-Control_Both_MECG.py
-Script used to select the case-specific WhaleTeq replay file, connect to the designated MECG device, start playback, stop playback, and write run logs. Whaleteq SDK can be downloaded from: https://pascallqms.atlassian.net/browse/IEE-352 
-![alt text](AdvanceBIS_setup.png)
+A Python-based control and data capture system for managing multiple WhaleTeq MECG, synchronizing EEG display capture, and logging session data for EG case replay workflows.
 
-The script performs the following for each selected M0 case:
+![AdvanceBIS Setup](AdvanceBIS_setup.png)
 
-Start capture
-    Start BIS Advance display capture (video or images taken at multiple second intervals).
-    Start SedLine display capture (video or images taken at multiple second intervals).
+---
 
-Run case
-    Replay the M0 EEG for full case duration on the chosen EEG system
-    Stop recordings.
+## Table of Contents
 
-Data logging
-    Upload raw media to controlled storage with correct naming convention.
+- [Overview](#overview)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Usage](#usage)
+- [Pre-Session Checklist](#pre-session-checklist)
+- [Channel Mapping and Scaling](#channel-mapping-and-scaling)
+- [Troubleshooting](#troubleshooting)
 
-Before each recording session:
+---
 
-Run the MECG control script (Control_Both_MECG.py)
+## Overview
 
-Verify that the MECG control script can detect the intended MECG device IDs.
-    “device is connected (WME2101-240xxx)” will be printed for each connected MECG.
+`Control_Both_MECG.py` automates the full M0 case replay pipeline:
 
-Verify that the camera capture script can detect the correct BIS and SedLine webcams.
-    “[device_cam] started (x) is_open=True” will be printed for each cam successfully started.
+1. **Start Capture** — Initiates BIS Advance and SedLine display capture (video or images at configurable intervals).
+2. **Run Case** — Replays the M0 EEG for the full case duration on the chosen EEG system, then stops recordings.
+3. **Data Logging** — Uploads raw media to controlled storage using the correct naming convention.
 
-Confirm that the output directory for the session is writable.
-    Set zipResults to True to save a .zip folder in the OUTPUT_ROOT. This will require storage on the laptop disc.
+---
 
-Confirm that the selected case replay file exists and matches the intended case ID.
-    “[timestamp], [device] started case x - saving images to your/path” will be printed for each output directory.
+## Requirements
 
-If you want to run the next unrecorded case, pass shared_lock to Device.shared_lock.
-    Any device that is not instanstiated with shared_lock will run through each case independently.
+- **OS:** Windows (required for Device Manager and DLL support)
+- **Python:** 3.x
+- **Hardware:**
+  - WhaleTeq MECG device(s) (e.g., `WME2101-240xxx`)
+  - BIS Advance display + webcam
+  - SedLine display + webcam
+- **Dependencies:**
+  - WhaleTeq SDK (`MECG20x64.dll`, `MECG20x64.2.dll`)  
+    Download from: [IEE-352 on Confluence](https://pascallqms.atlassian.net/browse/IEE-352)
+  - Python packages: opencv-python, time, threading, zipfile
 
-In the event that any issues arise, double-check the folder, cam_path, path to MECG20x64.dll, and device name.
-    folder variable should be changed to the path that input files are stored.
-    cam1_path and cam2_path should be changed to the index of the webcams used.
+---
 
-Press Windows key + X and select Device Manager to check if webcams are connected.
-    Device class should be instantiated with a string device name and a path to the MECG20x64.dll and MECG20x64.2.dll files on your computer. To connect more MECGs, simply duplicate this file, rename it to MECG20x64.n.dll, and pass it to a Device class.
+## Installation
 
+1. Clone this repository:
+```bash
+   git clone https://github.com/your-org/ControlMultipleMECG.git
+   cd ControlMultipleMECG
+```
 
-Channel Mapping and Scaling
-When using MECG, if Lead I or Lead II are being used, apply the Wilson Terminal lead-cancellation (e.g., scaling V1-6 as appropriate) so that the intended differential signals appear at the monitor input. If using convert_to_whaleteq_format.py, this is done automatically.
+2. Install required Python packages:
+```bash
+   pip install opencv-python time threading zipfile
+```
+
+3. To connect additional MECG devices, duplicate the DLL, rename it to `MECG20x64.n.dll`, and pass it to a new `Device` instance (see [Configuration](#configuration)).
+
+---
+
+## Configuration
+
+Before running, update the following variables in `Control_Both_MECG.py`:
+
+| Variable | Description | Example |
+|---|---|---|
+| `folder` | Path to the directory containing input replay files | `"C:\cases\input"` |
+| `cam1_path` | Index of the first webcam | `0` |
+| `cam2_path` | Index of the second webcam | `1` |
+| `zipResults` | If `True`, saves output as a `.zip` archive in `OUTPUT_ROOT` (requires local disk space) | `True` / `False` |
+| `shared_lock` | Pass to `Device.shared_lock` to synchronize case progression across devices | See [Usage](#usage) |
+
+---
+
+## Usage
+
+### Basic Run
+
+```bash
+python Control_Both_MECG.py
+```
+
+### Running Cases Synchronously Across Devices
+
+To ensure all devices advance to the next unrecorded case together, pass `shared_lock` to each `Device` instance:
+
+```python
+device1 = Device("WME2101-240001", dll_path="C:/sdk/MECG20x64.dll", shared_lock=shared_lock)
+device2 = Device("WME2101-240002", dll_path="C:/sdk/MECG20x64.2.dll", shared_lock=shared_lock)
+```
+
+> **Note:** Any `Device` not instantiated with `shared_lock` will iterate through cases independently.
+
+---
+
+## Pre-Session Checklist
+
+Before each recording session, verify the following:
+
+- [ ] **MECG devices detected** — Each connected device should print:
+device is connected (WME2101-240xxx)
+- [ ] **Webcams detected** — Each camera should print:
+[device_cam] started (x) is_open=True
+- [ ] **Output directory is writable** — Confirm `OUTPUT_ROOT` exists and has write permissions. Set `zipResults = True` if a compressed archive is needed.
+- [ ] **Replay file verified** — Confirm the selected case replay file exists and matches the intended case ID. On successful start, you should see:
+[timestamp], [device] started case x - saving images to your/path
+---
+
+## Channel Mapping and Scaling
+
+When using MECG with **Lead I** or **Lead II**, apply Wilson Terminal lead-cancellation and scale channels V1–V6 as appropriate so that the intended differential signals appear correctly at the monitor input.
+
+If using `convert_to_whaleteq_format.py`, this correction is applied **automatically**.
+
+---
+
+## Troubleshooting
+
+| Issue | What to Check |
+|---|---|
+| MECG device not detected | Verify `device name` string and path to `MECG20x64.dll` / `MECG20x64.2.dll` |
+| Webcam not found | Update `cam1_path` / `cam2_path` to correct webcam indices |
+| Input files not loading | Ensure `folder` points to the correct input directory |
+| Webcam index unknown | Press **Win + X** → **Device Manager** → expand **Imaging Devices** to find connected cameras |
+| Output not saving | Confirm `OUTPUT_ROOT` path exists and the current user has write access |
+
+---
