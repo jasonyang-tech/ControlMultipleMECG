@@ -35,8 +35,7 @@ A Python-based control and data capture system for managing multiple WhaleTeq ME
 - **Python:** 3.x
 - **Hardware:**
   - WhaleTeq MECG device(s) (e.g., `WME2101-240xxx`)
-  - BIS Advance display + webcam
-  - SedLine display + webcam
+  - EEG Monitors + webcam
 - **Dependencies:**
   - WhaleTeq SDK (`MECG20x64.dll`, `MECG20x64.2.dll`)  
     Download from: [IEE-352 on Confluence](https://pascallqms.atlassian.net/browse/IEE-352)
@@ -68,9 +67,10 @@ Before running, update the following variables in `Control_Both_MECG.py`:
 | Variable | Description | Example |
 |---|---|---|
 | `folder` | Path to the directory containing input replay files | `"C:\cases\input"` |
+| `OUTPUT_ROOT` | Path to the directory to write output replay files | `"C:\cases\output"` |
 | `cam1_path` | Index of the first webcam | `0` |
 | `cam2_path` | Index of the second webcam | `1` |
-| `zipResults` | If `True`, saves output as a `.zip` archive in `OUTPUT_ROOT` (requires local disk space) | `True` / `False` |
+| `zipResults` | If `True`, saves output as a `.zip` archive(requires local disk space) | `True` / `False` |
 | `shared_lock` | Pass to `Device.shared_lock` to synchronize case progression across devices | See [Usage](#usage) |
 
 ---
