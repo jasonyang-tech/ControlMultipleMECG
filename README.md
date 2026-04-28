@@ -38,7 +38,7 @@ A Python-based control and data capture system for managing multiple WhaleTeq ME
   - EEG Monitors + webcam
 - **Dependencies:**
   - WhaleTeq SDK (`MECG20x64.dll`, `MECG20x64.2.dll`)  
-    Download from: [IEE-352 on Confluence](https://pascallqms.atlassian.net/browse/IEE-352)
+    Download from: [IEE-352 on Confluence](https://pascallqms.atlassian.net/browse/IEE-352), [WhaleTeq MECG2.0 Product Page](https://www.whaleteq.com/en/product/1/9-ecg-ekg-testing/view8-mecg-20)
   - Python packages: opencv-python, thread6, zip-files
 
 ---
@@ -88,8 +88,8 @@ python Control_Both_MECG.py
 To ensure all devices advance to the next unrecorded case together, pass `shared_lock` to each `Device` instance:
 
 ```python
-device1 = Device("WME2101-240001", dll_path="C:/sdk/MECG20x64.dll", shared_lock=shared_lock)
-device2 = Device("WME2101-240002", dll_path="C:/sdk/MECG20x64.2.dll", shared_lock=shared_lock)
+device1 = Device("WME2101-240001", dll_path="C:/mecgFiles/MECG20x64.dll", shared_lock=shared_lock)
+device2 = Device("WME2101-240002", dll_path="C:/mecgFiles/MECG20x64.2.dll", shared_lock=shared_lock)
 ```
 
 > **Note:** Any `Device` not instantiated with `shared_lock` will iterate through cases independently.
