@@ -39,7 +39,7 @@ A Python-based control and data capture system for managing multiple WhaleTeq ME
 - **Dependencies:**
   - WhaleTeq SDK (`MECG20x64.dll`, `MECG20x64.2.dll`)  
     Download from: [IEE-352 on Confluence](https://pascallqms.atlassian.net/browse/IEE-352)
-  - Python packages: opencv-python, time, threading, zipfile
+  - Python packages: opencv-python, thread6, zip-files
 
 ---
 
@@ -53,7 +53,7 @@ A Python-based control and data capture system for managing multiple WhaleTeq ME
 
 2. Install required Python packages:
 ```bash
-   pip install opencv-python time threading zipfile
+   pip install opencv-python, thread6, zip-files
 ```
 
 3. To connect additional MECG devices, duplicate the DLL, rename it to `MECG20x64.n.dll`, and pass it to a new `Device` instance (see [Configuration](#configuration)).
